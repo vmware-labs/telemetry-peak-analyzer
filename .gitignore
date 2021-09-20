@@ -1,0 +1,5 @@
+src/telemetry_peak_analyzer.egg-info
+data/config.ini
+.tox
+venv
+global_table.json

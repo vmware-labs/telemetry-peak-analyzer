@@ -1,0 +1,6 @@
+[tina_backend]
+hosts =
+port =
+timeout_ms = 30000
+parallel_bulk = true
+scan_size = 10000

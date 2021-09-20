@@ -1,0 +1,43 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py36, py39
+isolated_build = True
+
+[testenv]
+commands=nosetests
+deps=
+    ddt
+    mock
+    nose
+"""
+
+[tool.pylint.master]
+ignored-modules = "config"
+disable = """
+W1514,F0010,useless-super-delegation,E1103,W0108,W0404,R0904,R0922,W0105,
+W0142,C0301,C0321,C0322,C0324,R,W0232,E1001,W0212,W0703,C,I0011,I0012,I0013,E0012"""
+
+[tool.black]
+line-length = 98
+include = "\\.pyi?$"
+exclude = """
+/(
+    \\.git
+  | \\.hg
+  | \\.mypy_cache
+  | \\.tox
+  | \\.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+"""
