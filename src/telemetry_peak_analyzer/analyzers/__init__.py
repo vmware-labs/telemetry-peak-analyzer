@@ -523,12 +523,12 @@ class TwoIndexTwoDimensionAnalyzer(AbstractAnalyzer, ABC):
         :rtype: dict[str, dict[str, dict[str, dict[str, int]]]]
         :return: the local tables
         """
-        all_dimensions = self._dimensions + self.CROSS_DIMENSIONS
+        terms = self._dimensions + self.CROSS_DIMENSIONS + [self._index[1]]
         json_data = self._backend.group_by(
             start_date=self._start_ts,
             end_date=self._end_ts,
             index=self._index,
-            dimensions=all_dimensions,
+            dimensions=self._dimensions + self.CROSS_DIMENSIONS,
         )
         local_tables = collections.defaultdict(dict)
         for item in json_data:
@@ -536,10 +536,10 @@ class TwoIndexTwoDimensionAnalyzer(AbstractAnalyzer, ABC):
             dimension_1 = item[self._dimensions[1]]
             if dimension_1 not in local_tables[dimension_0]:
                 local_tables[dimension_0][dimension_1] = {
-                    extra_dim: collections.defaultdict(int) for extra_dim in all_dimensions
+                    term: collections.defaultdict(int) for term in terms
                 }
-            for dim in all_dimensions:
-                local_tables[dimension_0][dimension_1][dim][item[dim]] += item["count"]
+            for term in terms:
+                local_tables[dimension_0][dimension_1][term][item[term]] += item["count"]
         return local_tables
 
 

@@ -233,7 +233,7 @@ class JsonBackend(TwoIndexTwoDimensionBackend):
     ) -> List[Dict[str, str]]:
         """Implement interface."""
         counters = collections.Counter()
-        dimensions += [index[1]]
+        dimensions = dimensions + [index[1]]
         for file_path in self._file_paths:
             with open(file_path, "r") as f:
                 for json_doc in ijson.items(f, "item"):
