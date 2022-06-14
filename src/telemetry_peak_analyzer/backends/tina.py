@@ -141,7 +141,9 @@ class TinaBackend(backends.TwoIndexTwoDimensionBackend):
     def __init__(self, conf: configparser.ConfigParser, section_name: str) -> None:
         """Constructor."""
         super(TinaBackend, self).__init__(conf, section_name)
-        self._tina_reader = readers.BulkFileSubmissionReader(conf, section_name)
+        #self._tina_reader = readers.BulkFileSubmissionReader(conf, section_name)
+        self._tina_reader = readers.BulkEventReader(conf, section_name)
+
         self._logger.info(
             "Loading backend '%s' from section '%s'",
             self.__class__.__name__,
