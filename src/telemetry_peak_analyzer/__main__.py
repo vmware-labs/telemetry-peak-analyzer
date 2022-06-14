@@ -110,7 +110,7 @@ def run(
         logger.info("\tFailed: %s", str(ioe))
         logger.info("Loading global tables from the backend")
         global_tables = peak_analyzer.get_global_tables()
-
+   
     logger.info("Loading local tables")
     local_tables = peak_analyzer.get_local_tables()
     peaks = peak_analyzer.get_peaks(global_tables, local_tables, threshold=threshold)
@@ -124,7 +124,7 @@ def run(
                 logger.info("\t%s: %s", k, round(v, 2))
     if output_file_path:
         logger.info("Saving output to: %s", output_file_path)
-        peak_analyzer.save_to_json(peaks, output_file_path)
+        telemetry_peak_analyzer.save_to_json(peaks, output_file_path)
 
     logger.info("Refreshing global tables")
     global_tables = peak_analyzer.refresh_global_tables(global_tables, local_tables)
@@ -200,7 +200,8 @@ def parse_and_run_command():
         "-a",
         "--analyzer",
         dest="analyzer_class",
-        default="telemetry_peak_analyzer.analyzers.FileTypePeakAnalyzer",
+        #default="telemetry_peak_analyzer.analyzers.FileTypePeakAnalyzer",
+        default="telemetry_peak_analyzer.analyzers.NetworkTypePeakAnalyzer",
         type=import_class,
         help="the full class name of the analyzer used to process telemetry data",
     )
