@@ -141,9 +141,7 @@ class TinaBackend(backends.TwoIndexTwoDimensionBackend):
     def __init__(self, conf: configparser.ConfigParser, section_name: str) -> None:
         """Constructor."""
         super(TinaBackend, self).__init__(conf, section_name)
-        #self._tina_reader = readers.BulkFileSubmissionReader(conf, section_name)
-        self._tina_reader = readers.BulkEventReader(conf, section_name)
-
+        self._tina_reader = readers.BulkFileSubmissionReader(conf, section_name)
         self._logger.info(
             "Loading backend '%s' from section '%s'",
             self.__class__.__name__,
@@ -183,9 +181,52 @@ class TinaBackend(backends.TwoIndexTwoDimensionBackend):
         dimensions: List[str],
     ) -> List[Dict[str, str]]:
         """Implement interface."""
-        return self._tina_reader.aggregate(
+        buckets = self._tina_reader.aggregate(
             start_ts=start_date,
             end_ts=end_date,
             terms=dimensions + [index[1]],
             limit=None,
         )
+        # This might or might not be a generator so in-place edit can't work
+        new_buckets = []
+        terms_set = set(dimensions + [index[1]])
+        for bucket in buckets:
+            for k in bucket.keys():
+                if k in terms_set:
+                    # Make sure we always deal with strings
+                    bucket[k] = str(bucket[k])
+            new_buckets.append(bucket)
+        return new_buckets
+
+
+class NetworkTinaBackend(TinaBackend):
+    """New backend specialized for network events."""
+
+    def __init__(self, conf: configparser.ConfigParser, section_name: str) -> None:
+        """Constructor."""
+        backends.TwoIndexTwoDimensionBackend.__init__(self, conf, section_name)
+        self._tina_reader = readers.BulkEventReader(conf, section_name)
+        self._logger.info(
+            "Loading backend '%s' from section '%s'",
+            self.__class__.__name__,
+            section_name,
+        )
+
+    def stats(
+        self,
+        start_date: datetime.datetime,
+        end_date: datetime.datetime,
+        index: List[str],
+        dimensions: List[str],
+        dimensions_values: Dict[str, List[str]],
+    ) -> Dict[str, Dict[str, Dict[str, float]]]:
+        return super(NetworkTinaBackend, self).stats(start_date, end_date, index, dimensions, dimensions_values)
+
+    def group_by(
+        self,
+        start_date: datetime.datetime,
+        end_date: datetime.datetime,
+        index: List[str],
+        dimensions: List[str],
+    ) -> List[Dict[str, str]]:
+        return super(NetworkTinaBackend, self).group_by(start_date, end_date, index, dimensions)

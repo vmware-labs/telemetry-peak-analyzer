@@ -21,7 +21,7 @@ from telemetry_peak_analyzer import models
 class AbstractAnalyzer(abc.ABC):
     """Abstract analyzer."""
 
-    DEFAULT_METRIC_TABLE_AGE = datetime.timedelta(days=10)
+    DEFAULT_GLOBAL_TABLE_AGE = datetime.timedelta(days=10)
 
     @staticmethod
     def _get_window_count(start_ts: int, end_ts: int) -> int:
@@ -177,7 +177,6 @@ class TwoIndexTwoDimensionAnalyzer(AbstractAnalyzer, ABC):
     def _get_dimension_values(self, dimension: str) -> List[str]:
         """Get all values that a dimension can exhibit, if available."""
         try:
-            print("DIM VALUES: ", self.DIMENSIONS_METADATA[dimension]["values"])
             return self.DIMENSIONS_METADATA[dimension]["values"]
         except KeyError:
             return []
@@ -436,7 +435,7 @@ class TwoIndexTwoDimensionAnalyzer(AbstractAnalyzer, ABC):
         :return: the global tables
         """
         end_date = datetime.datetime.utcnow()
-        start_date = end_date - self.DEFAULT_METRIC_TABLE_AGE
+        start_date = end_date - self.DEFAULT_GLOBAL_TABLE_AGE
         ret = self._backend.stats(
             start_date=start_date,
             end_date=end_date,
@@ -602,28 +601,28 @@ class FileTypePeakAnalyzer(TwoIndexTwoDimensionAnalyzer):
             end_ts=end_ts,
         )
 
+
 class NetworkTypePeakAnalyzer(TwoIndexTwoDimensionAnalyzer):
     """Analyzer using index and dimension to track network types."""
 
     CROSS_DIMENSIONS = [
         "source.user_id",
-        "event.transport_protocol",
     ]
 
     DIMENSIONS_METADATA = {
         "event.impact": {
-           "values": ['70','30'],
+           "values": ["70", "30"],
         }
     }
 
     _INDEX = [
         "utc_timestamp",
-        "src.ip",
+        "event.id",
     ]
 
     _DIMENSIONS = [
         "event.impact",
-        "event.id",
+        "threat.name.keyword",
     ]
 
     def __init__(
@@ -643,6 +642,8 @@ class NetworkTypePeakAnalyzer(TwoIndexTwoDimensionAnalyzer):
         """
         if not isinstance(backend, backends.TwoIndexTwoDimensionBackend):
             raise ValueError("Backend is not compatible with the chosen analyzer")
+        # Relax the default age of a global table when not present
+        self.DEFAULT_METRIC_TABLE_AGE = datetime.timedelta(days=3)
         super(NetworkTypePeakAnalyzer, self).__init__(
             conf=conf,
             index=self._INDEX,

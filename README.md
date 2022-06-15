@@ -188,3 +188,7 @@ If you want to run pre-commit on all files use the following command:
 
 ## License
 [BSD 2-Clause](https://spdx.org/licenses/BSD-2-Clause.html)
+
+## Extra
+Test command:
+` python -m telemetry_peak_analyzer -c ./data/config.ini -a telemetry_peak_analyzer.analyzers.NetworkTypePeakAnalyzer -b telemetry_peak_analyzer.backends.tina.NetworkTinaBackend -n tina_westus -e 2022-04-01 -d 1 -o ./output.json`
