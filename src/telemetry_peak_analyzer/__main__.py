@@ -200,8 +200,7 @@ def parse_and_run_command():
         "-a",
         "--analyzer",
         dest="analyzer_class",
-        #default="telemetry_peak_analyzer.analyzers.FileTypePeakAnalyzer",
-        default="telemetry_peak_analyzer.analyzers.NetworkTypePeakAnalyzer",
+        default="telemetry_peak_analyzer.analyzers.FileTypePeakAnalyzer",
         type=import_class,
         help="the full class name of the analyzer used to process telemetry data",
     )
