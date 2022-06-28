@@ -21,7 +21,7 @@ from telemetry_peak_analyzer import models
 class AbstractAnalyzer(abc.ABC):
     """Abstract analyzer."""
 
-    DEFAULT_GLOBAL_TABLE_AGE = datetime.timedelta(days=10)
+    DEFAULT_GLOBAL_TABLE_AGE = datetime.timedelta(days=7)
 
     @staticmethod
     def _get_window_count(start_ts: int, end_ts: int) -> int:
