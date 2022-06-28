@@ -21,7 +21,7 @@ from telemetry_peak_analyzer import models
 class AbstractAnalyzer(abc.ABC):
     """Abstract analyzer."""
 
-    DEFAULT_METRIC_TABLE_AGE = datetime.timedelta(days=10)
+    DEFAULT_GLOBAL_TABLE_AGE = datetime.timedelta(days=7)
 
     @staticmethod
     def _get_window_count(start_ts: int, end_ts: int) -> int:
@@ -435,7 +435,7 @@ class TwoIndexTwoDimensionAnalyzer(AbstractAnalyzer, ABC):
         :return: the global tables
         """
         end_date = datetime.datetime.utcnow()
-        start_date = end_date - self.DEFAULT_METRIC_TABLE_AGE
+        start_date = end_date - self.DEFAULT_GLOBAL_TABLE_AGE
         ret = self._backend.stats(
             start_date=start_date,
             end_date=end_date,
@@ -483,6 +483,7 @@ class TwoIndexTwoDimensionAnalyzer(AbstractAnalyzer, ABC):
         :return: some statistics for each dimension combination
         """
         local_stats = collections.defaultdict(dict)
+        print("LOCAL STATS: ",local_stats)
         for dimension_0 in local_tables:
             for dimension_1 in local_tables[dimension_0]:
                 local_table = local_tables[dimension_0][dimension_1]
@@ -530,16 +531,19 @@ class TwoIndexTwoDimensionAnalyzer(AbstractAnalyzer, ABC):
             index=self._index,
             dimensions=self._dimensions + self.CROSS_DIMENSIONS,
         )
+
         local_tables = collections.defaultdict(dict)
         for item in json_data:
             dimension_0 = item[self._dimensions[0]]
             dimension_1 = item[self._dimensions[1]]
+            
             if dimension_1 not in local_tables[dimension_0]:
                 local_tables[dimension_0][dimension_1] = {
                     term: collections.defaultdict(int) for term in terms
                 }
             for term in terms:
                 local_tables[dimension_0][dimension_1][term][item[term]] += item["count"]
+
         return local_tables
 
 
@@ -589,6 +593,58 @@ class FileTypePeakAnalyzer(TwoIndexTwoDimensionAnalyzer):
         if not isinstance(backend, backends.TwoIndexTwoDimensionBackend):
             raise ValueError("Backend is not compatible with the chosen analyzer")
         super(FileTypePeakAnalyzer, self).__init__(
+            conf=conf,
+            index=self._INDEX,
+            dimensions=self._DIMENSIONS,
+            backend=backend,
+            start_ts=start_ts,
+            end_ts=end_ts,
+        )
+
+
+class NetworkTypePeakAnalyzer(TwoIndexTwoDimensionAnalyzer):
+    """Analyzer using index and dimension to track network types."""
+
+    CROSS_DIMENSIONS = [
+        "source.user_id",
+    ]
+
+    DIMENSIONS_METADATA = {
+        "event.impact": {
+           "values": ["70", "30"],
+        }
+    }
+
+    _INDEX = [
+        "utc_timestamp",
+        "event.id",
+    ]
+
+    _DIMENSIONS = [
+        "event.impact",
+        "threat.name.keyword",
+    ]
+
+    def __init__(
+        self,
+        conf: configparser.ConfigParser,
+        backend: backends.BackendType,
+        start_ts: datetime.datetime,
+        end_ts: datetime.datetime,
+    ) -> None:
+        """
+        Constructor.
+
+        :param configparser.ConfigParser conf: the conf object
+        :param backendType backend: the backend
+        :param datetime.datetime start_ts: the beginning of the time interval
+        :param datetime.datetime end_ts: the end of the time interval
+        """
+        if not isinstance(backend, backends.TwoIndexTwoDimensionBackend):
+            raise ValueError("Backend is not compatible with the chosen analyzer")
+        # Relax the default age of a global table when not present
+        self.DEFAULT_METRIC_TABLE_AGE = datetime.timedelta(days=3)
+        super(NetworkTypePeakAnalyzer, self).__init__(
             conf=conf,
             index=self._INDEX,
             dimensions=self._DIMENSIONS,
