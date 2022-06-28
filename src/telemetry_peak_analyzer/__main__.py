@@ -123,7 +123,7 @@ def run(
             for k, v in peak._asdict().items():
                 logger.info("\t%s: %s", k, round(v, 2))
     if output_file_path:
-        logger.info("Saving output to: %s", output_file_path)
+        logger.info(" output to: %s", output_file_path)
         telemetry_peak_analyzer.save_to_json(peaks, output_file_path)
 
     logger.info("Refreshing global tables")
