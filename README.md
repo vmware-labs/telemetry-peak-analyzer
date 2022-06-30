@@ -188,3 +188,11 @@ If you want to run pre-commit on all files use the following command:
 
 ## License
 [BSD 2-Clause](https://spdx.org/licenses/BSD-2-Clause.html)
+
+## Extra
+The peak analyzer can be used to detect network peaks too. In order to use it for this purpose, while calling the peak analyzer, the `-a` option should be used to specify that the NetworkTypePeakAnalyzer is to be used. The `-b` option should specify the backend to be used, i.e. the NetworkTinaBackend. 
+
+Due to the much larger volume of network peaks in a given time range as compared to file peaks, it is recommended to use the `-e` and `-d` parameters to specify the date and time range. 
+
+Test command:
+` python -m telemetry_peak_analyzer -c ./data/config.ini -a telemetry_peak_analyzer.analyzers.NetworkTypePeakAnalyzer -b telemetry_peak_analyzer.backends.tina.NetworkTinaBackend -n tina_westus -e 2022-04-01 -d 1 -o ./output.json`
