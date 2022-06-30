@@ -483,7 +483,6 @@ class TwoIndexTwoDimensionAnalyzer(AbstractAnalyzer, ABC):
         :return: some statistics for each dimension combination
         """
         local_stats = collections.defaultdict(dict)
-        print("LOCAL STATS: ",local_stats)
         for dimension_0 in local_tables:
             for dimension_1 in local_tables[dimension_0]:
                 local_table = local_tables[dimension_0][dimension_1]
@@ -531,19 +530,16 @@ class TwoIndexTwoDimensionAnalyzer(AbstractAnalyzer, ABC):
             index=self._index,
             dimensions=self._dimensions + self.CROSS_DIMENSIONS,
         )
-
         local_tables = collections.defaultdict(dict)
         for item in json_data:
             dimension_0 = item[self._dimensions[0]]
             dimension_1 = item[self._dimensions[1]]
-            
             if dimension_1 not in local_tables[dimension_0]:
                 local_tables[dimension_0][dimension_1] = {
                     term: collections.defaultdict(int) for term in terms
                 }
             for term in terms:
                 local_tables[dimension_0][dimension_1][term][item[term]] += item["count"]
-
         return local_tables
 
 
@@ -603,7 +599,7 @@ class FileTypePeakAnalyzer(TwoIndexTwoDimensionAnalyzer):
 
 
 class NetworkTypePeakAnalyzer(TwoIndexTwoDimensionAnalyzer):
-    """Analyzer using index and dimension to track network types."""
+    """Analyzer using index and dimension to track network peaks."""
 
     CROSS_DIMENSIONS = [
         "source.user_id",

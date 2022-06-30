@@ -110,7 +110,6 @@ def run(
         logger.info("\tFailed: %s", str(ioe))
         logger.info("Loading global tables from the backend")
         global_tables = peak_analyzer.get_global_tables()
-   
     logger.info("Loading local tables")
     local_tables = peak_analyzer.get_local_tables()
     peaks = peak_analyzer.get_peaks(global_tables, local_tables, threshold=threshold)
